@@ -26,6 +26,7 @@ jobs:
           # against the lal library. However, the lal library installed through
           # pip is hard to link against. This symlinks it into /usr/lib so
           # that it can be found.
+          DYLD_LIBRARY_PATH: /Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/lalsuite.dylibs/
           CIBW_BEFORE_BUILD: bash tools/cibuildwheel_prep.sh
           # lalsuite currently not available on python3.9. It should be in the
           # very near future though, so add cp39-* here when it is!
