@@ -124,7 +124,7 @@ class BankSimJob(inspiral.InspiralAnalysisJob):
 
 
 class BankSimNode(pipeline.CondorDAGNode):
-    def __init__(self, job, dag, injs, approx, injmin=0, injmax=-1, tag="SIM", p_node=[]):
+    def __init__(self, job, dag, injs, approx, tgr_min, tgr_max, tgr_pn_order, injmin=0, injmax=-1, tag="SIM", p_node=[]):
         pipeline.CondorDAGNode.__init__(self,job)
         self.add_file_opt("injection-file", injs)
         self.add_var_opt("injection-approx", approx)
@@ -329,6 +329,11 @@ for inj_run in cp.options("injections"):
     inspinjJob = InspinjJob(cp, tag_base = tag.lower())
     inj_node = InspinjNode(inspinjJob, dag, tag=tag,seed = seed, p_node = [])
 
+    # Get tgr params
+    tgr_min = cp.get("banksim", "tgr-min")
+    tgr_max = cp.get("banksim", "tgr-max")
+    tgr_pn_order = cp.get("banksim", "tgr-pn-order")
+
     # reset the config parser option back to default values
     for opt in cp.options(inj_run):
         cp.remove_option('inspinj',opt)
@@ -342,7 +347,7 @@ for inj_run in cp.options("injections"):
 
         tag = "%05d" % j
         sim_name = "SBANK_SIM_%s_%s_%05d" % (options.user_tag, inj_run.upper(), j)
-        sim_nodes.append(BankSimNode(banksimJob, dag, inj_name, waveform, j*injperjob, (j+1)*injperjob, sim_name, [inj_node]))
+        sim_nodes.append(BankSimNode(banksimJob, dag, inj_name, waveform, tgr_min, tgr_max, tgr_pn_order, j*injperjob, (j+1)*injperjob, sim_name, [inj_node]))
 
     # merge and plot the partial sims
     sim_names = [node.get_output_files()[0] for node in sim_nodes]

@@ -50,10 +50,16 @@ def ligolw_table_to_array(tab):
 
     # construct numpy dtype and row accessor
     name_type_pairs = tab.validcolumns.items()
-    name_type_pairs.sort()
+    name_type_pairs = sorted(name_type_pairs)
+    if isinstance(tab, lsctables.SimInspiralTable):
+        dtype = np.dtype({
+        "names": [n if n != 'process:process_id' else 'process_id' for n, _ in name_type_pairs],
+        "formats": [type_map[t] for n, t in name_type_pairs]})
+
     dtype = np.dtype({
-        "names": [n for n, _ in name_type_pairs],
-        "formats": [type_map[t] for _, t in name_type_pairs]})
+        "names": [n for n, _ in name_type_pairs if n != 'process:process_id'],
+        "formats": [type_map[t] for n, t in name_type_pairs if n != 'process:process_id']})
+
     extract_in_order = attrgetter(*dtype.names)
 
     # populate array
@@ -100,6 +106,9 @@ def parse_command_line():
     parser.add_option("--cache-waveforms", default = False, action="store_true", help="A given waveform in the template bank will be used many times throughout the bank simulation process. You can save a considerable amount of CPU by caching the waveform from the first time it is generated; however, do so only if you are sure that storing the waveforms in memory will not overload the system memory.")
     parser.add_option("--neighborhood-size", metavar="N", default = 1.0, type="float", help="Specify the window size in seconds to define \"nearby\" templates used to compute the match against each injection. The neighborhood is chosen symmetric about the injection; \"nearby\" is defined using the option --neighborhood-type. The default value of 1.0 is *not a guarantee of performance*. Choosing the neighborhood too small may lead to the reporting of lower-than-actual fitting factors.")
     parser.add_option("--neighborhood-param", default="tau0", choices=["tau0", "dur"], help="Choose how the neighborhood is sorted for match calculations.")
+    parser.add_option("--tgr-min", default = -1, type = 'float', help = 'Minimum deviation to probe GR deviation. Supports percentile or absolute deviation, but assumes the user is choosing the correct one based on PN order.')
+    parser.add_option("--tgr-max", default = 1, type = 'float', help = 'Maximum deviation to probe GR deviation. Supports percentile or absolute deviation, but assumes the user is choosing the correct one based on PN order.')
+    parser.add_option("--tgr-pn-order", default = None, type = 'str', help="Choose the nth/2 PN order to test GR deviations (e.g. '-1', 0, 1, etc.). Presently tests -100% (-1) to 100% (1) for percent (absolute) deviations.")
 
     opts, args = parser.parse_args()
 
@@ -191,6 +200,8 @@ newtbl = lsctables.SimInspiralTable()
 noinjs = 0
 for s in sims:
 
+    setattr(s, 'alpha1', np.random.uniform(opts.tgr_min,opts.tgr_max))
+    setattr(s, 'source', opts.tgr_pn_order)
     # short-circuit this potentially slow code path if possible
     if len(newtbl) == opts.injection_max - opts.injection_min:
         break

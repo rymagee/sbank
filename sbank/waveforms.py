@@ -35,6 +35,17 @@ from .tau0tau3 import m1m2_to_tau0tau3
 np.seterr(all="ignore")
 _sit_cols = llwsit.validcolumns
 
+tgr_mapping = {'0': lalsim.SimInspiralWaveformParamsInsertNonGRDChi0,
+               '1': lalsim.SimInspiralWaveformParamsInsertNonGRDChi1,
+               '2': lalsim.SimInspiralWaveformParamsInsertNonGRDChi2,
+               '3': lalsim.SimInspiralWaveformParamsInsertNonGRDChi3,
+               '4': lalsim.SimInspiralWaveformParamsInsertNonGRDChi4,
+               '5': lalsim.SimInspiralWaveformParamsInsertNonGRDChi5,
+               '5L': lalsim.SimInspiralWaveformParamsInsertNonGRDChi5L,
+               '6': lalsim.SimInspiralWaveformParamsInsertNonGRDChi6,
+               '6L': lalsim.SimInspiralWaveformParamsInsertNonGRDChi6L,
+               '7': lalsim.SimInspiralWaveformParamsInsertNonGRDChi7
+               }
 
 class SnglInspiralTable(llwsit):
     def __init__(self, *args, **kwargs):
@@ -44,6 +55,8 @@ class SnglInspiralTable(llwsit):
                 if _sit_cols[entry] in ['real_4', 'real_8']:
                     setattr(self, entry, 0.)
                 elif _sit_cols[entry] == 'int_4s':
+                    setattr(self, entry, 0)
+                elif _sit_cols[entry] == 'int_8s':
                     setattr(self, entry, 0)
                 elif _sit_cols[entry] == 'lstring':
                     setattr(self, entry, '')
@@ -191,7 +204,7 @@ class AlignedSpinTemplate(object):
                  ('template_duration', float32), ('f_lower', float32),
                  ('approximant', 'S32')]
 
-    def __init__(self, m1, m2, spin1z, spin2z, bank, flow=None, duration=None):
+    def __init__(self, m1, m2, spin1z, spin2z, bank, LALDict = None, flow=None, duration=None):
 
         self.m1 = float(m1)
         self.m2 = float(m2)
@@ -199,6 +212,7 @@ class AlignedSpinTemplate(object):
         self.spin2z = float(spin2z)
         self.chieff = lalsim.SimIMRPhenomBComputeChi(self.m1, self.m2,
                                                      self.spin1z, self.spin2z)
+        self.LALDict = LALDict
         self.bank = bank
 
         if flow is None:
@@ -303,6 +317,8 @@ class AlignedSpinTemplate(object):
 
     @classmethod
     def from_sim(cls, sim, bank):
+        LALDict = lal.CreateDict()
+        tgr_mapping[sim.source](LALDict, sim.alpha1)
         return cls(sim.mass1, sim.mass2, sim.spin1z, sim.spin2z, bank)
 
     @classmethod
@@ -375,7 +391,7 @@ class AlignedSpinTemplate(object):
                 1e6*PC_SI, 0., 0.,
                 0., 0., 0.,
                 df, self.flow, f_final, self.flow,
-                None, approx)
+                self.LALDict, approx)
 
         else:
             hplus_fd, hcross_fd = lalsim.SimInspiralFD(
@@ -384,7 +400,7 @@ class AlignedSpinTemplate(object):
                 1.e6*PC_SI, 0., 0.,
                 0., 0., 0.,
                 df, self.flow, f_final, 40.,
-                None, approx)
+                self.LALDict, approx)
         return hplus_fd
 
     def get_whitened_normalized(self, df, ASD=None, PSD=None):
