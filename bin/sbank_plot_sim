@@ -453,3 +453,14 @@ if __name__ == "__main__":
     canvas = FigureCanvas(fig)
     fig.savefig(name+"_match_vs_injM_vs_injchi.png")
 
+    fig = Figure()
+    ax = fig.add_subplot(111)
+    collection = ax.scatter(inj_mchirp, [x*100 for x in inj_alpha], c=match, s=20, vmin=smallest_match, linewidth=0, alpha=0.5, vmax=1)
+    ax.set_xlabel(r"Template $M_\mathrm{chirp}$ ($M_\odot$)")
+    ax.set_ylabel(r"Injected GR deviation (percent)")
+    ax.set_title(r"Colorbar is Fitting Factor; assuming $f_\mathrm{low}=%d\,\mathrm{Hz}$" % 15)
+    ax.grid(True)
+    fig.colorbar(collection, ax=ax).set_label("Fitting Factor")
+    canvas = FigureCanvas(fig)
+    fig.savefig(name+"_match_vs_chirp_vs_alpha.png")
+
