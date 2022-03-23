@@ -319,11 +319,11 @@ class AlignedSpinTemplate(object):
     def from_sim(cls, sim, bank):
         LALDict = lal.CreateDict()
         tgr_mapping[sim.source](LALDict, sim.alpha1)
-        return cls(sim.mass1, sim.mass2, sim.spin1z, sim.spin2z, bank)
+        return cls(sim.mass1, sim.mass2, sim.spin1z, sim.spin2z, bank, LALDict = LALDict)
 
     @classmethod
     def from_sngl(cls, sngl, bank):
-        return cls(sngl.mass1, sngl.mass2, sngl.spin1z, sngl.spin2z, bank)
+        return cls(sngl.mass1, sngl.mass2, sngl.spin1z, sngl.spin2z, bank = bank)
 
     @classmethod
     def from_dict(cls, params, idx, bank):

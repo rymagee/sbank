@@ -113,6 +113,7 @@ class BankSimJob(inspiral.InspiralAnalysisJob):
         sections = ['banksim']
         inspiral.InspiralAnalysisJob.__init__(self,cp,sections,exec_name,extension)
         self.add_condor_cmd('request_memory', '3999')
+        self.add_condor_cmd('request_disk', '1GB')
         self.tag_base = tag_base
         self.add_condor_cmd('getenv','True')
         self.set_stdout_file('logs/'+tag_base+'$(macroid)-$(cluster)-$(process).out')
@@ -153,7 +154,7 @@ class PlotSimJob(inspiral.InspiralAnalysisJob):
         if cp.has_section("accounting"):
             self.add_condor_cmd('accounting_group', cp.get("accounting", "accounting-group"))
         self.add_condor_cmd('request_memory', '3999')
-
+        self.add_condor_cmd('request_disk', '1GB')
 
 class PlotSimNode(pipeline.CondorDAGNode):
     def __init__(self, job, dag, h5files=[],p_node=[]):

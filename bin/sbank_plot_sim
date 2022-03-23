@@ -98,6 +98,7 @@ if __name__ == "__main__":
     tmplt_tau0, tmplt_tau3 = m1m2_to_tau0tau3(tmplt_arr["mass1"], tmplt_arr["mass2"], flow)
     tmplt_mchirp = compute_mchirp(tmplt_arr["mass1"], tmplt_arr["mass2"])
     inj_mchirp = compute_mchirp(inj_arr["mass1"], inj_arr["mass2"])
+    inj_alpha = inj_arr["alpha1"]
 
     #
     # compute effective/reduced spin parameter for templates
